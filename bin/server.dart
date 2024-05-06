@@ -1,13 +1,15 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:dizney_api/application/config/application_config.dart';
-import 'package:dizney_api/application/middlewares/cors/cors_middlewares.dart';
-import 'package:dizney_api/application/middlewares/defaultContentType/default_content_type.dart';
-// import 'package:get_it/get_it.dart';
+import 'package:get_it/get_it.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
+
+import 'package:dizney_api/application/config/application_config.dart';
+import 'package:dizney_api/application/middlewares/cors/cors_middlewares.dart';
+import 'package:dizney_api/application/middlewares/defaultContentType/default_content_type.dart';
+import 'package:dizney_api/application/middlewares/security/security_middleware.dart';
 
 const _hostname = '0.0.0.0';
 
@@ -29,19 +31,19 @@ void main(List<String> args) async {
   final appConfig = ApplicationConfig();
   await appConfig.loadConfigApplication(router);
 
-  // final getIt = GetIt.I;
+  final getIt = GetIt.I;
 
-  var handler = const shelf.Pipeline()
+  final handler = const shelf.Pipeline()
       .addMiddleware(CorsMiddlewares().handler)
       .addMiddleware(
         DefaultContentType('application/josn; charset=utf-8').handler,
       )
-  //     .addMiddleware(
-  //       SecurityMiddleware(getIt.get()).handler,
-  //     )
-  //     .addMiddleware(shelf.logRequests())
+      .addMiddleware(
+        SecurityMiddleware(getIt.get()).handler,
+      )
+      .addMiddleware(shelf.logRequests())
       .addHandler(router);
 
-  var server = await io.serve(handler, _hostname, port);
+  final server = await io.serve(handler, _hostname, port);
   print('Serving at http://${server.address.host}:${server.port}');
 }
