@@ -1,13 +1,10 @@
-import 'package:dizney_api/modules/teste/teste_router.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import 'i_router.dart';
 
 class RouterConfigure {
   final Router _router;
-  final List<IRouter> _routers = [
-    TesteRouter(),
-  ];
+  final List<IRouter> _routers = [];
 
   RouterConfigure(this._router);
 
