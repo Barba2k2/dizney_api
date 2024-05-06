@@ -28,7 +28,7 @@ void main(List<String> args) async {
   //# AppConfig
   // final router = Router();
   final appConfig = ApplicationConfig();
-  // await appConfig.loadConfigApplication(router);
+  await appConfig.loadConfigApplication();
 
   // final getIt = GetIt.I;
 
