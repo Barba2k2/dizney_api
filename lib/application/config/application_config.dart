@@ -1,3 +1,4 @@
+import 'package:dizney_api/application/config/service_locator_config.dart';
 import 'package:dotenv/dotenv.dart' show load, env;
 import 'package:get_it/get_it.dart';
 
@@ -10,6 +11,7 @@ class ApplicationConfig {
     await _loadEnv();
     _loadConfigDatabase();
     _configLogger();
+    _laodDependencies();
   }
 
   Future<void> _loadEnv() async => load();
@@ -25,5 +27,8 @@ class ApplicationConfig {
     GetIt.I.registerSingleton(databseConfig);
   }
 
-  void _configLogger() => GetIt.I.registerLazySingleton<ILogger>(() => TLogger());
+  void _configLogger() =>
+      GetIt.I.registerLazySingleton<ILogger>(() => TLogger());
+
+  void _laodDependencies() => configureDependencies();
 }
