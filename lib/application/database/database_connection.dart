@@ -1,7 +1,7 @@
-import 'package:dizney_api/application/config/database_connection_configuration.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mysql1/src/single_connection.dart';
 
+import '../config/database_connection_configuration.dart';
 import 'i_database_connection.dart';
 
 @LazySingleton(as: IDatabaseConnection)

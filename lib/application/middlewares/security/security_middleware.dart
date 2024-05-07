@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-import 'package:dizney_api/application/helpers/jwt_helper.dart';
-import 'package:dizney_api/application/logger/i_logger.dart';
-import 'package:dizney_api/application/middlewares/middlewares.dart';
-import 'package:dizney_api/application/middlewares/security/security_skip_url.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
-import 'package:shelf/src/response.dart';
 import 'package:shelf/src/request.dart';
+import 'package:shelf/src/response.dart';
+
+import '../../helpers/jwt_helper.dart';
+import '../../logger/i_logger.dart';
+import '../middlewares.dart';
+import 'security_skip_url.dart';
 
 class SecurityMiddleware extends Middlewares {
   final ILogger log;

@@ -1,10 +1,10 @@
-import 'package:dizney_api/application/exceptions/user_not_found_exception.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mysql1/mysql1.dart';
 
 import '../../../application/database/i_database_connection.dart';
 import '../../../application/exceptions/database_exception.dart';
 import '../../../application/exceptions/user_exists_exceptions.dart';
+import '../../../application/exceptions/user_not_found_exception.dart';
 import '../../../application/helpers/cryity_helper.dart';
 import '../../../application/logger/i_logger.dart';
 import '../../../entities/user.dart';
@@ -63,7 +63,10 @@ class UserRepository implements IUserRepository {
 
   @override
   Future<User> loginWithEmailAndPassword(
-      String email, String password, bool supplierUser) async {
+    String email,
+    String password,
+    bool supplierUser,
+  ) async {
     MySqlConnection? conn;
 
     try {
@@ -106,6 +109,99 @@ class UserRepository implements IUserRepository {
       log.error('Erro on try login', e, s);
 
       throw DatabaseException(message: e.message);
+    } finally {
+      await conn?.close();
+    }
+  }
+
+  @override
+  Future<User> loginByEmailSocialKey(
+    String email,
+    String socialKey,
+    String socialType,
+  ) async {
+    MySqlConnection? conn;
+
+    try {
+      conn = await connection.openConnection();
+
+      final result = await conn.query(
+        'SELECT * FROM usuario WHERE email = ?',
+        [
+          email,
+        ],
+      );
+
+      if (result.isEmpty) {
+        log.error('User not found');
+        throw UserNotFoundException(message: 'User not found');
+      } else {
+        final dataMySql = result.first;
+        if (dataMySql['social_id'] == null ||
+            dataMySql['social_id'] != socialKey) {
+          await conn.query(
+            'UPDATE usuario SET social_id = ?, tipo_cadastro = ? WHERE id = ?',
+            [
+              socialKey,
+              socialType,
+              dataMySql['id'],
+            ],
+          );
+        }
+
+        return User(
+          id: dataMySql['id'] as int,
+          email: dataMySql['email'],
+          registerType: dataMySql['tipo_cadastro'],
+          iosToken: (dataMySql['ios_token'] as Blob?)?.toString(),
+          androidToken: (dataMySql['android_token'] as Blob?)?.toString(),
+          refreshToken: (dataMySql['refresh_token'] as Blob?)?.toString(),
+          imageAvatar: (dataMySql['img_avatar'] as Blob?)?.toString(),
+          supplierId: dataMySql['fornecedor_id'],
+        );
+      }
+    } on MySqlException catch (e, s) {
+      log.error('Erro on try login', e, s);
+
+      throw DatabaseException(message: e.message);
+    } finally {
+      await conn?.close();
+    }
+  }
+
+  @override
+  Future<void> updateUserDeviceTokenAndRefreshToken(User user) async {
+    MySqlConnection? conn;
+
+    try {
+      conn = await connection.openConnection();
+
+      final setParams = {};
+
+      if (user.iosToken != null) {
+        setParams.putIfAbsent('ios_token', () => user.iosToken);
+      } else {
+        setParams.putIfAbsent('android_token', () => user.androidToken);
+      }
+
+      final query = '''
+        UPDATE ususario SET ${setParams.keys.elementAt(0)} = ? 
+        refresh_token = ? 
+        WHERE id = ?
+      ''';
+
+      await conn.query(
+        query,
+        [
+          setParams.values.elementAt(0),
+          user.refreshToken!,
+          user.id!,
+        ],
+      );
+    }on MySqlException catch (e, s) {
+      log.error('Error on confirm login', e, s);
+      throw DatabaseException();
+    
     } finally {
       await conn?.close();
     }
