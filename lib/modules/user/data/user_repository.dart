@@ -1,3 +1,4 @@
+import 'package:dizney_api/modules/user/view_models/platform.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mysql1/mysql1.dart';
 
@@ -281,9 +282,37 @@ class UserRepository implements IUserRepository {
           id,
         ],
       );
-    
     } on MySqlException catch (e, s) {
       log.error('Error on update avatar', e, s);
+      throw DatabaseException();
+    } finally {
+      await conn?.close();
+    }
+  }
+
+  @override
+  Future<void> updateDeviceToken(
+    int id,
+    String token,
+    Platform platform,
+  ) async {
+    MySqlConnection? conn;
+
+    try {
+      conn = await connection.openConnection();
+
+      var seet = '';
+      if (platform == Platform.ios) {
+        seet = 'ios_token = ?';
+      } else {
+        seet = 'android_token = ?';
+      }
+
+      final query = 'UPDATE usuario SET $seet WHERE id = ?';
+
+      await conn.query(query, [token, id]);
+    } on MySqlException catch (e, s) {
+      log.error('Error on update device token', e, s);
       throw DatabaseException();
     } finally {
       await conn?.close();

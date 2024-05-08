@@ -1,3 +1,4 @@
+import 'package:dizney_api/modules/user/view_models/user_update_token_device_input_model.dart';
 import 'package:injectable/injectable.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 
@@ -153,4 +154,12 @@ class UserService implements IUserService {
       rethrow;
     }
   }
+
+  @override
+  Future<void> updateDeviceToken(UserUpdateTokenDeviceInputModel inputModel) =>
+      userRepository.updateDeviceToken(
+        inputModel.userId,
+        inputModel.token,
+        inputModel.platform,
+      );
 }
