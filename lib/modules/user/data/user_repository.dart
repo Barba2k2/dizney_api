@@ -161,7 +161,7 @@ class UserRepository implements IUserRepository {
         );
       }
     } on MySqlException catch (e, s) {
-      log.error('Erro on try login', e, s);
+      log.error('Erro on try login with social network', e, s);
 
       throw DatabaseException(message: e.message);
     } finally {
@@ -220,6 +220,9 @@ class UserRepository implements IUserRepository {
           user.id!,
         ],
       );
+    } on MySqlException catch (e, s) {
+      log.error('Error on update refresh token', e, s);
+      throw DatabaseException();
     } finally {
       await conn?.close();
     }
@@ -256,6 +259,32 @@ class UserRepository implements IUserRepository {
           supplierId: dataMySql['fornecedor_id'],
         );
       }
+    } on MySqlException catch (e, s) {
+      log.error('Error on search user by ID', e, s);
+      throw DatabaseException();
+    } finally {
+      await conn?.close();
+    }
+  }
+
+  @override
+  Future<void> updateUrlAvatar(int id, String urlAvatar) async {
+    MySqlConnection? conn;
+
+    try {
+      conn = await connection.openConnection();
+
+      await conn.query(
+        'UPDATE usuario SET img_avatar = ? WHERE id = ?',
+        [
+          urlAvatar,
+          id,
+        ],
+      );
+    
+    } on MySqlException catch (e, s) {
+      log.error('Error on update avatar', e, s);
+      throw DatabaseException();
     } finally {
       await conn?.close();
     }

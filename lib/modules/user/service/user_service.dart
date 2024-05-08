@@ -1,15 +1,16 @@
-import 'package:dizney_api/application/helpers/jwt_helper.dart';
-import 'package:dizney_api/modules/user/view_models/refresh_token_view_model.dart';
-import 'package:dizney_api/modules/user/view_models/user_confirm_input_model.dart';
-import 'package:dizney_api/modules/user/view_models/user_refresh_token_input_model.dart';
 import 'package:injectable/injectable.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 
 import '../../../application/exceptions/service_exception.dart';
 import '../../../application/exceptions/user_not_found_exception.dart';
+import '../../../application/helpers/jwt_helper.dart';
 import '../../../application/logger/i_logger.dart';
 import '../../../entities/user.dart';
 import '../data/i_user_repository.dart';
+import '../view_models/refresh_token_view_model.dart';
+import '../view_models/update_url_avatar_view_model.dart';
+import '../view_models/user_confirm_input_model.dart';
+import '../view_models/user_refresh_token_input_model.dart';
 import '../view_models/user_save_input_model.dart';
 import 'i_user_service.dart';
 
@@ -137,4 +138,19 @@ class UserService implements IUserService {
 
   @override
   Future<User> findById(int id) => userRepository.findById(id);
+
+  @override
+  Future<User> updateAvatar(UpdateUrlAvatarViewModel viewModel) async {
+    try {
+      await userRepository.updateUrlAvatar(
+        viewModel.userId,
+        viewModel.urlAvatar,
+      );
+
+      return findById(viewModel.userId);
+    } catch (e, s) {
+      log.error('Error on update avatar', e, s);
+      rethrow;
+    }
+  }
 }

@@ -1,3 +1,5 @@
+import 'package:dizney_api/modules/user/view_models/update_url_avatar_view_model.dart';
+
 import '../../../entities/user.dart';
 import '../view_models/refresh_token_view_model.dart';
 import '../view_models/user_confirm_input_model.dart';
@@ -20,4 +22,5 @@ abstract class IUserService {
   Future<String> confirmLogin(UserConfirmInputModel inputModel);
   Future<RefreshTokenViewModel> refreshToken(UserRefreshTokenInputModel model);
   Future<User> findById(int id);
+  Future<User> updateAvatar(UpdateUrlAvatarViewModel viewModel);
 }
