@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dizney_api/modules/user/view_models/user_confirm_input_model.dart';
+import 'package:dizney_api/modules/user/view_models/user_refresh_token_input_model.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -135,6 +136,41 @@ class AuthController {
     } catch (e) {
       log.error('Error on confirm login', e);
       return Response.internalServerError();
+    }
+  }
+
+  @Route.put('/refresh')
+  Future<Response> refreshToken(Request request) async {
+    try {
+      final user = int.parse(request.headers['user']!);
+      final supplier = int.tryParse(request.headers['supplier'] ?? '');
+      final accessToken = request.headers['access_token']!;
+
+      final model = UserRefreshTokenInputModel(
+        user: user,
+        supplier: supplier,
+        accessToken: accessToken,
+        dataRequest: await request.readAsString(),
+      );
+
+      final userRefreshToken = await userService.refreshToken(model);
+
+      return Response.ok(
+        jsonEncode(
+          {
+            'access_token': userRefreshToken.accessToken,
+            'refresh_token': userRefreshToken.refreshToken,
+          },
+        ),
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode(
+          {
+            'message': 'Error on updtade access_token',
+          },
+        ),
+      );
     }
   }
 
