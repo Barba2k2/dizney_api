@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:dizney_api/modules/user/view_models/user_confirm_input_model.dart';
-import 'package:dizney_api/modules/user/view_models/user_refresh_token_input_model.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -12,6 +10,8 @@ import '../../../application/exceptions/user_not_found_exception.dart';
 import '../../../application/helpers/jwt_helper.dart';
 import '../../../application/logger/i_logger.dart';
 import '../../../entities/user.dart';
+import '../view_models/user_confirm_input_model.dart';
+import '../view_models/user_refresh_token_input_model.dart';
 import '../service/i_user_service.dart';
 import '../view_models/login_view_model.dart';
 import '../view_models/user_save_input_model.dart';

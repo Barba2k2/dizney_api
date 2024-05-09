@@ -1,8 +1,8 @@
-import 'package:dizney_api/modules/user/controller/user_controller.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shelf_router/src/router.dart';
 
 import '../../application/routers/i_router.dart';
+import 'controller/user_controller.dart';
 import 'controller/auth_controller.dart';
 
 class UserRouter implements IRouter {

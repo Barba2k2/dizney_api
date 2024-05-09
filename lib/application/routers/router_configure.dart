@@ -1,6 +1,6 @@
-import 'package:dizney_api/modules/categories/categories_router.dart';
 import 'package:shelf_router/shelf_router.dart';
 
+import '../../modules/categories/categories_router.dart';
 import '../../modules/user/user_router.dart';
 import 'i_router.dart';
 

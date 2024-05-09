@@ -1,4 +1,3 @@
-import 'package:dizney_api/modules/user/view_models/user_update_token_device_input_model.dart';
 import 'package:injectable/injectable.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 
@@ -8,6 +7,7 @@ import '../../../application/helpers/jwt_helper.dart';
 import '../../../application/logger/i_logger.dart';
 import '../../../entities/user.dart';
 import '../data/i_user_repository.dart';
+import '../view_models/user_update_token_device_input_model.dart';
 import '../view_models/refresh_token_view_model.dart';
 import '../view_models/update_url_avatar_view_model.dart';
 import '../view_models/user_confirm_input_model.dart';

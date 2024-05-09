@@ -1,4 +1,4 @@
-import 'package:dizney_api/application/helpers/request_mapping.dart';
+import '../../../application/helpers/request_mapping.dart';
 
 class UpdateUrlAvatarViewModel extends RequestMapping {
   int userId;

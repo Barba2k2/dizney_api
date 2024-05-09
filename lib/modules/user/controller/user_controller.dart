@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:dizney_api/modules/user/view_models/update_url_avatar_view_model.dart';
-import 'package:dizney_api/modules/user/view_models/user_update_token_device_input_model.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import '../../../application/logger/i_logger.dart';
+import '../view_models/user_update_token_device_input_model.dart';
+import '../view_models/update_url_avatar_view_model.dart';
 import '../service/i_user_service.dart';
 
 part 'user_controller.g.dart';
