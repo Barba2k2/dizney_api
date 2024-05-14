@@ -6,8 +6,6 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import '../../../application/logger/i_logger.dart';
-import '../view_models/user_update_token_device_input_model.dart';
-import '../view_models/update_url_avatar_view_model.dart';
 import '../service/i_user_service.dart';
 
 part 'user_controller.g.dart';
@@ -32,8 +30,6 @@ class UserController {
         jsonEncode(
           {
             'email': userData.email,
-            'register_type': userData.registerType,
-            'img_avatar': userData.imageAvatar,
           },
         ),
       );
@@ -46,60 +42,6 @@ class UserController {
           },
         ),
       );
-    }
-  }
-
-  @Route.put('/avatar')
-  Future<Response> updateAvatar(Request request) async {
-    try {
-      final userId = int.parse(request.headers['user']!);
-
-      final updateUrlAvatarViewModel = UpdateUrlAvatarViewModel(
-        userId: userId,
-        dataRequest: await request.readAsString(),
-      );
-
-      final user = await userService.updateAvatar(updateUrlAvatarViewModel);
-
-      return Response.ok(
-        jsonEncode(
-          {
-            'email': user.email,
-            'register_type': user.registerType,
-            'img_avatar': user.imageAvatar,
-          },
-        ),
-      );
-    } catch (e, s) {
-      log.error('Error on update avatar', e, s);
-      return Response.internalServerError(
-        body: jsonEncode(
-          {
-            'message': 'Error on update avatar',
-          },
-        ),
-      );
-    }
-  }
-
-  @Route.put('/device')
-  Future<Response> updateDeviceToken(Request request) async {
-    try {
-      final userId = int.parse(request.headers['user']!);
-      final dataRequest = await request.readAsString();
-
-      final uptadeDeviceToken = UserUpdateTokenDeviceInputModel(
-        userId: userId,
-        dataRequest: dataRequest,
-      );
-
-      await userService.updateDeviceToken(uptadeDeviceToken);
-
-      return Response.ok(jsonEncode({}));
-    } catch (e, s) {
-      log.error('Error on update device token', e, s);
-      return Response.internalServerError();
-
     }
   }
 

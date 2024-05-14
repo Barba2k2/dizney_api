@@ -33,29 +33,31 @@ class AuthController {
     try {
       final loginViewModel = LoginViewModel(await request.readAsString());
 
-      User user;
+      final User user;
 
-      if (!loginViewModel.socialLogin) {
-        user = await userService.loginWithEmailAndPassword(
-          loginViewModel.login,
-          loginViewModel.password,
-          loginViewModel.supplierUser,
-        );
-      } else {
-        user = await userService.loginWithSocial(
-          loginViewModel.login,
-          loginViewModel.avatar,
-          loginViewModel.socialType,
-          loginViewModel.socialKey,
-        );
+      if (user != null) {
+        return user;
       }
+
+      // if (!loginViewModel.socialLogin) {
+      //   user = await userService.loginWithEmailAndPassword(
+      //     loginViewModel.login,
+      //     loginViewModel.password,
+      //   );
+      // } else {
+      //   user = await userService.loginWithSocial(
+      //     loginViewModel.login,
+      //     loginViewModel.socialType,
+      //     loginViewModel.socialKey,
+      //   );
+      // }
 
       return Response.ok(
         jsonEncode(
           {
             'access_token': JwtHelper.generateJWT(
               user.id!,
-              user.supplierId,
+              // user.supplierId,
             ),
           },
         ),
@@ -115,8 +117,8 @@ class AuthController {
   Future<Response> confirmLogin(Request request) async {
     try {
       final user = int.parse(request.headers['user']!);
-      final supplier = int.tryParse(request.headers['supplier'] ?? '');
-      final token = JwtHelper.generateJWT(user, supplier).replaceAll(
+      // final supplier = int.tryParse(request.headers['supplier'] ?? '');
+      final token = JwtHelper.generateJWT(user).replaceAll(
         'Bearer ',
         '',
       );
@@ -129,10 +131,14 @@ class AuthController {
 
       final refreshToken = await userService.confirmLogin(inputModel);
 
-      return Response.ok(jsonEncode({
-        'access_token': 'Bearer $token',
-        'refresh_token': refreshToken,
-      }));
+      return Response.ok(
+        jsonEncode(
+          {
+            'access_token': 'Bearer $token',
+            'refresh_token': refreshToken,
+          },
+        ),
+      );
     } catch (e) {
       log.error('Error on confirm login', e);
       return Response.internalServerError();
@@ -143,12 +149,12 @@ class AuthController {
   Future<Response> refreshToken(Request request) async {
     try {
       final user = int.parse(request.headers['user']!);
-      final supplier = int.tryParse(request.headers['supplier'] ?? '');
+      // final supplier = int.tryParse(request.headers['supplier'] ?? '');
       final accessToken = request.headers['access_token']!;
 
       final model = UserRefreshTokenInputModel(
         user: user,
-        supplier: supplier,
+        // supplier: supplier,
         accessToken: accessToken,
         dataRequest: await request.readAsString(),
       );

@@ -8,7 +8,7 @@ import '../../../application/exceptions/user_not_found_exception.dart';
 import '../../../application/helpers/cryity_helper.dart';
 import '../../../application/logger/i_logger.dart';
 import '../../../entities/user.dart';
-import '../view_models/platform.dart';
+// import '../view_models/platform.dart';
 import 'i_user_repository.dart';
 
 @LazySingleton(as: IUserRepository)
@@ -33,14 +33,13 @@ class UserRepository implements IUserRepository {
         values(?, ?, ?, ?, ?, ?)
       ''';
 
-      final result = await conn.query(query, [
-        user.email,
-        user.registerType,
-        user.imageAvatar,
-        CriptyHelper.generatySha256Hash(user.password ?? ''),
-        user.supplierId,
-        user.socialKey,
-      ]);
+      final result = await conn.query(
+        query,
+        [
+          user.email,
+          CriptyHelper.generatySha256Hash(user.password ?? ''),
+        ],
+      );
 
       final userId = result.insertId;
 
@@ -66,7 +65,6 @@ class UserRepository implements IUserRepository {
   Future<User> loginWithEmailAndPassword(
     String email,
     String password,
-    bool supplierUser,
   ) async {
     MySqlConnection? conn;
 
@@ -74,12 +72,6 @@ class UserRepository implements IUserRepository {
       conn = await connection.openConnection();
 
       var query = 'SELECT * FROM usuario WHERE email = ? AND senha = ?';
-
-      if (supplierUser) {
-        query += ' AND fornecedor_id IS NOT NULL';
-      } else {
-        query += ' AND fornecedor_id IS NULL';
-      }
 
       final result = await conn.query(
         query,
@@ -98,12 +90,6 @@ class UserRepository implements IUserRepository {
         return User(
           id: userSqlData['id'] as int,
           email: userSqlData['email'],
-          registerType: userSqlData['tipo_cadastro'],
-          iosToken: (userSqlData['ios_token'] as Blob?)?.toString(),
-          androidToken: (userSqlData['android_token'] as Blob?)?.toString(),
-          refreshToken: (userSqlData['refresh_token'] as Blob?)?.toString(),
-          imageAvatar: (userSqlData['img_avatar'] as Blob?)?.toString(),
-          supplierId: userSqlData['fornecedor_id'],
         );
       }
     } on MySqlException catch (e, s) {
@@ -138,27 +124,10 @@ class UserRepository implements IUserRepository {
         throw UserNotFoundException(message: 'User not found');
       } else {
         final dataMySql = result.first;
-        if (dataMySql['social_id'] == null ||
-            dataMySql['social_id'] != socialKey) {
-          await conn.query(
-            'UPDATE usuario SET social_id = ?, tipo_cadastro = ? WHERE id = ?',
-            [
-              socialKey,
-              socialType,
-              dataMySql['id'],
-            ],
-          );
-        }
 
         return User(
           id: dataMySql['id'] as int,
           email: dataMySql['email'],
-          registerType: dataMySql['tipo_cadastro'],
-          iosToken: (dataMySql['ios_token'] as Blob?)?.toString(),
-          androidToken: (dataMySql['android_token'] as Blob?)?.toString(),
-          refreshToken: (dataMySql['refresh_token'] as Blob?)?.toString(),
-          imageAvatar: (dataMySql['img_avatar'] as Blob?)?.toString(),
-          supplierId: dataMySql['fornecedor_id'],
         );
       }
     } on MySqlException catch (e, s) {
@@ -179,12 +148,6 @@ class UserRepository implements IUserRepository {
 
       final setParams = {};
 
-      if (user.iosToken != null) {
-        setParams.putIfAbsent('ios_token', () => user.iosToken);
-      } else {
-        setParams.putIfAbsent('android_token', () => user.androidToken);
-      }
-
       final query = '''
         UPDATE ususario SET ${setParams.keys.elementAt(0)} = ? 
         refresh_token = ? 
@@ -195,7 +158,6 @@ class UserRepository implements IUserRepository {
         query,
         [
           setParams.values.elementAt(0),
-          user.refreshToken!,
           user.id!,
         ],
       );
@@ -217,7 +179,6 @@ class UserRepository implements IUserRepository {
       await conn.query(
         'UPDATE usuario SET refresh_token = ? WHERE id = ?',
         [
-          user.refreshToken,
           user.id!,
         ],
       );
@@ -252,12 +213,6 @@ class UserRepository implements IUserRepository {
         return User(
           id: dataMySql['id'] as int,
           email: dataMySql['email'],
-          registerType: dataMySql['tipo_cadastro'],
-          iosToken: (dataMySql['ios_token'] as Blob?)?.toString(),
-          androidToken: (dataMySql['android_token'] as Blob?)?.toString(),
-          refreshToken: (dataMySql['refresh_token'] as Blob?)?.toString(),
-          imageAvatar: (dataMySql['img_avatar'] as Blob?)?.toString(),
-          supplierId: dataMySql['fornecedor_id'],
         );
       }
     } on MySqlException catch (e, s) {
@@ -284,35 +239,6 @@ class UserRepository implements IUserRepository {
       );
     } on MySqlException catch (e, s) {
       log.error('Error on update avatar', e, s);
-      throw DatabaseException();
-    } finally {
-      await conn?.close();
-    }
-  }
-
-  @override
-  Future<void> updateDeviceToken(
-    int id,
-    String token,
-    Platform platform,
-  ) async {
-    MySqlConnection? conn;
-
-    try {
-      conn = await connection.openConnection();
-
-      var seet = '';
-      if (platform == Platform.ios) {
-        seet = 'ios_token = ?';
-      } else {
-        seet = 'android_token = ?';
-      }
-
-      final query = 'UPDATE usuario SET $seet WHERE id = ?';
-
-      await conn.query(query, [token, id]);
-    } on MySqlException catch (e, s) {
-      log.error('Error on update device token', e, s);
       throw DatabaseException();
     } finally {
       await conn?.close();

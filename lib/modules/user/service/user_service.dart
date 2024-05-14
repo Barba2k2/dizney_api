@@ -30,8 +30,6 @@ class UserService implements IUserService {
     final userEntity = User(
       email: user.email,
       password: user.password,
-      registerType: 'App',
-      supplierId: user.supplierId,
     );
 
     return userRepository.createUser(userEntity);
@@ -41,54 +39,43 @@ class UserService implements IUserService {
   Future<User> loginWithEmailAndPassword(
     String email,
     String password,
-    bool supplierUser,
   ) =>
       userRepository.loginWithEmailAndPassword(
         email,
         password,
-        supplierUser,
       );
 
-  @override
-  Future<User> loginWithSocial(
-    String email,
-    String avatar,
-    String socialType,
-    String socialKey,
-  ) async {
-    try {
-      return await userRepository.loginByEmailSocialKey(
-        email,
-        socialKey,
-        socialType,
-      );
-    } on UserNotFoundException catch (e) {
-      log.error('User not found, creating new user', e);
+  // @override
+  // Future<User> loginWithSocial(
+  //   String email,
+  //   String avatar,
+  //   String socialType,
+  //   String socialKey,
+  // ) async {
+  //   try {
+  //     return await userRepository.loginByEmailSocialKey(
+  //       email,
+  //       socialKey,
+  //       socialType,
+  //     );
+  //   } on UserNotFoundException catch (e) {
+  //     log.error('User not found, creating new user', e);
 
-      final user = User(
-        email: email,
-        imageAvatar: avatar,
-        registerType: socialType,
-        socialKey: socialKey,
-        password: DateTime.now().toString(),
-      );
+  //     final user = User(
+  //       email: email,
+  //       imageAvatar: avatar,
+  //       registerType: socialType,
+  //       socialKey: socialKey,
+  //       password: DateTime.now().toString(),
+  //     );
 
-      return await userRepository.createUser(user);
-    }
-  }
+  //     return await userRepository.createUser(user);
+  //   }
+  // }
 
   @override
   Future<String> confirmLogin(UserConfirmInputModel inputModel) async {
     final refreshToken = JwtHelper.refreshToken(inputModel.accessToken);
-
-    final user = User(
-      id: inputModel.userId,
-      refreshToken: refreshToken,
-      iosToken: inputModel.iosDeviceToken,
-      androidToken: inputModel.androidDeviceToken,
-    );
-
-    await userRepository.updateUserDeviceTokenAndRefreshToken(user);
 
     return refreshToken;
   }
@@ -98,14 +85,13 @@ class UserService implements IUserService {
     UserRefreshTokenInputModel model,
   ) async {
     _validateRefreshToken(model);
-    final newAccessToken = JwtHelper.generateJWT(model.user, model.supplier);
+    final newAccessToken = JwtHelper.generateJWT(model.user);
     final newRefreshToken = JwtHelper.refreshToken(
       newAccessToken.replaceAll('Bearer', ''),
     );
 
     final user = User(
       id: model.user,
-      refreshToken: newRefreshToken,
     );
 
     await userRepository.updateRefreshToken(user);
@@ -140,26 +126,5 @@ class UserService implements IUserService {
   @override
   Future<User> findById(int id) => userRepository.findById(id);
 
-  @override
-  Future<User> updateAvatar(UpdateUrlAvatarViewModel viewModel) async {
-    try {
-      await userRepository.updateUrlAvatar(
-        viewModel.userId,
-        viewModel.urlAvatar,
-      );
-
-      return findById(viewModel.userId);
-    } catch (e, s) {
-      log.error('Error on update avatar', e, s);
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> updateDeviceToken(UserUpdateTokenDeviceInputModel inputModel) =>
-      userRepository.updateDeviceToken(
-        inputModel.userId,
-        inputModel.token,
-        inputModel.platform,
-      );
+  
 }

@@ -6,16 +6,13 @@ class JwtHelper {
 
   JwtHelper._();
 
-  static String generateJWT(int userId, int? supplierId) {
+  static String generateJWT(int userId) {
     final claimSet = JwtClaim(
       issuer: 'dizney',
       subject: userId.toString(),
       expiry: DateTime.now().add(const Duration(days: 1)),
       notBefore: DateTime.now(),
       issuedAt: DateTime.now(),
-      otherClaims: <String, dynamic>{
-        'supplier': supplierId,
-      },
       maxAge: const Duration(days: 1),
     );
 
