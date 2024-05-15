@@ -33,6 +33,14 @@ class UserRepository implements IUserRepository {
         VALUES(?, ?, ?, ?, ?, ?, 0, 0)
       ''';
 
+      if (user.firstname == null ||
+          user.lastname == null ||
+          user.username == null ||
+          user.email == null ||
+          user.password == null) {
+        throw Exception('Missing required fields');
+      }
+
       final result = await conn.query(
         query,
         [
@@ -114,74 +122,6 @@ class UserRepository implements IUserRepository {
   }
 
   @override
-  Future<User> loginByEmailSocialKey(
-    String email,
-    String socialKey,
-    String socialType,
-  ) async {
-    MySqlConnection? conn;
-
-    try {
-      conn = await connection.openConnection();
-
-      final result = await conn.query(
-        'SELECT * FROM usuario WHERE email = ?',
-        [
-          email,
-        ],
-      );
-
-      if (result.isEmpty) {
-        log.error('User not found');
-        throw UserNotFoundException(message: 'User not found');
-      } else {
-        final dataMySql = result.first;
-
-        return User(
-          id: dataMySql['id'] as int,
-          email: dataMySql['email'],
-        );
-      }
-    } on MySqlException catch (e, s) {
-      log.error('Erro on try login with social network', e, s);
-
-      throw DatabaseException(message: e.message);
-    } finally {
-      await conn?.close();
-    }
-  }
-
-  @override
-  Future<void> updateUserDeviceTokenAndRefreshToken(User user) async {
-    MySqlConnection? conn;
-
-    try {
-      conn = await connection.openConnection();
-
-      final setParams = {};
-
-      final query = '''
-        UPDATE ususario SET ${setParams.keys.elementAt(0)} = ? 
-        refresh_token = ? 
-        WHERE id = ?
-      ''';
-
-      await conn.query(
-        query,
-        [
-          setParams.values.elementAt(0),
-          user.id!,
-        ],
-      );
-    } on MySqlException catch (e, s) {
-      log.error('Error on confirm login', e, s);
-      throw DatabaseException();
-    } finally {
-      await conn?.close();
-    }
-  }
-
-  @override
   Future<void> updateRefreshToken(User user) async {
     MySqlConnection? conn;
 
@@ -235,25 +175,25 @@ class UserRepository implements IUserRepository {
     }
   }
 
-  @override
-  Future<void> updateUrlAvatar(int id, String urlAvatar) async {
-    MySqlConnection? conn;
+  // @override
+  // Future<void> updateUrlAvatar(int id, String urlAvatar) async {
+  //   MySqlConnection? conn;
 
-    try {
-      conn = await connection.openConnection();
+  //   try {
+  //     conn = await connection.openConnection();
 
-      await conn.query(
-        'UPDATE usuario SET img_avatar = ? WHERE id = ?',
-        [
-          urlAvatar,
-          id,
-        ],
-      );
-    } on MySqlException catch (e, s) {
-      log.error('Error on update avatar', e, s);
-      throw DatabaseException();
-    } finally {
-      await conn?.close();
-    }
-  }
+  //     await conn.query(
+  //       'UPDATE usuario SET img_avatar = ? WHERE id = ?',
+  //       [
+  //         urlAvatar,
+  //         id,
+  //       ],
+  //     );
+  //   } on MySqlException catch (e, s) {
+  //     log.error('Error on update avatar', e, s);
+  //     throw DatabaseException();
+  //   } finally {
+  //     await conn?.close();
+  //   }
+  // }
 }
