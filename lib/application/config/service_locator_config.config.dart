@@ -8,11 +8,6 @@
 import 'package:get_it/get_it.dart' as _i1;
 import 'package:injectable/injectable.dart' as _i2;
 
-import '../../modules/categories/controller/categories_controller.dart' as _i17;
-import '../../modules/categories/data/categories_repository.dart' as _i14;
-import '../../modules/categories/data/i_categories_repository.dart' as _i13;
-import '../../modules/categories/service/categories_service.dart' as _i16;
-import '../../modules/categories/service/i_categories_service.dart' as _i15;
 import '../../modules/user/controller/auth_controller.dart' as _i12;
 import '../../modules/user/controller/user_controller.dart' as _i11;
 import '../../modules/user/data/i_user_repository.dart' as _i6;
@@ -55,13 +50,5 @@ _i1.GetIt $initGetIt(
         userService: get<_i9.IUserService>(),
         log: get<_i8.ILogger>(),
       ));
-  gh.lazySingleton<_i13.ICategoriesRepository>(() => _i14.CategoriesRepository(
-        connection: get<_i3.IDatabaseConnection>(),
-        log: get<_i8.ILogger>(),
-      ));
-  gh.lazySingleton<_i15.ICategoriesService>(() =>
-      _i16.CategoriesService(repository: get<_i13.ICategoriesRepository>()));
-  gh.factory<_i17.CategoriesController>(
-      () => _i17.CategoriesController(service: get<_i15.ICategoriesService>()));
   return get;
 }
