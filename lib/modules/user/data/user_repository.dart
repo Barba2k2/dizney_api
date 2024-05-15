@@ -29,31 +29,43 @@ class UserRepository implements IUserRepository {
       conn = await connection.openConnection();
 
       final query = '''
-        INSERT usuario(email, tipo_cadastro, img_avatar, senha, fornecedor_id, social_id)
-        values(?, ?, ?, ?, ?, ?)
+        INSERT users(firstname, lastname, username, email, password, timezone, identity_verify, address_verify) 
+        VALUES(?, ?, ?, ?, ?, ?, 0, 0)
       ''';
 
       final result = await conn.query(
         query,
         [
+          user.firstname,
+          user.lastname,
+          user.username,
           user.email,
-          CriptyHelper.generatySha256Hash(user.password ?? ''),
+          CriptyHelper.generateSha256Hash(user.password ?? ''),
+          user.timezone ?? 'UTC',
         ],
       );
 
       final userId = result.insertId;
 
-      return user.copyWith(id: userId, password: null);
+      // Usando copyWith para criar uma nova instância do User com o ID atualizado
+      return user.copyWith(
+        id: userId,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        username: user.username,
+        email: user.email,
+        password: null,
+        timezone: user.timezone,
+      );
     } on MySqlException catch (e, s) {
-      if (e.message.contains('usuario.email_UNIQUE')) {
+      if (e.message.contains('users.email_UNIQUE')) {
         log.error('Email already exists in the database', e, s);
-        throw UserExistsExecptions();
+        throw UserExistsExceptions();
       }
 
-      log.error('Error on create user', e, s);
-
+      log.error('Error on creating user', e, s);
       throw DatabaseException(
-        message: 'Error on create user',
+        message: 'Error on creating user',
         exception: e,
       );
     } finally {
@@ -77,7 +89,7 @@ class UserRepository implements IUserRepository {
         query,
         [
           email,
-          CriptyHelper.generatySha256Hash(password),
+          CriptyHelper.generateSha256Hash(password),
         ],
       );
 
