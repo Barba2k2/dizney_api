@@ -10,7 +10,7 @@ Router _$AuthControllerRouter(AuthController service) {
   final router = Router();
   router.add(
     'POST',
-    r'/',
+    r'/login',
     service.login,
   );
   router.add(

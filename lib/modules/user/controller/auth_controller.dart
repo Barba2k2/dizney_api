@@ -28,39 +28,33 @@ class AuthController {
     required this.log,
   });
 
-  @Route.post('/')
+  @Route.post('/login')
   Future<Response> login(Request request) async {
     try {
       final loginViewModel = LoginViewModel(await request.readAsString());
 
-      final User user;
+      User user;
 
-      if (user != null) {
-        return user;
-      }
+      user = await userService.loginWithEmailAndPassword(
+        loginViewModel.email,
+        loginViewModel.password,
+      );
 
-      // if (!loginViewModel.socialLogin) {
-      //   user = await userService.loginWithEmailAndPassword(
-      //     loginViewModel.login,
-      //     loginViewModel.password,
-      //   );
-      // } else {
-      //   user = await userService.loginWithSocial(
-      //     loginViewModel.login,
-      //     loginViewModel.socialType,
-      //     loginViewModel.socialKey,
-      //   );
-      // }
+      final accessToken = JwtHelper.generateJWT(
+        user.id!,
+      );
 
       return Response.ok(
-        jsonEncode(
-          {
-            'access_token': JwtHelper.generateJWT(
-              user.id!,
-              // user.supplierId,
-            ),
-          },
-        ),
+        jsonEncode({
+          'access_token': accessToken,
+          'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'image': user.image,
+          }
+        }),
+        headers: {'Content-Type': 'application/json'},
       );
     } on UserNotFoundException {
       return Response.forbidden(
@@ -117,7 +111,7 @@ class AuthController {
   Future<Response> confirmLogin(Request request) async {
     try {
       final user = int.parse(request.headers['user']!);
-      // final supplier = int.tryParse(request.headers['supplier'] ?? '');
+
       final token = JwtHelper.generateJWT(user).replaceAll(
         'Bearer ',
         '',
@@ -149,12 +143,11 @@ class AuthController {
   Future<Response> refreshToken(Request request) async {
     try {
       final user = int.parse(request.headers['user']!);
-      // final supplier = int.tryParse(request.headers['supplier'] ?? '');
+
       final accessToken = request.headers['access_token']!;
 
       final model = UserRefreshTokenInputModel(
         user: user,
-        // supplier: supplier,
         accessToken: accessToken,
         dataRequest: await request.readAsString(),
       );

@@ -13,15 +13,5 @@ Router _$UserControllerRouter(UserController service) {
     r'/',
     service.findByToken,
   );
-  router.add(
-    'PUT',
-    r'/avatar',
-    service.updateAvatar,
-  );
-  router.add(
-    'PUT',
-    r'/device',
-    service.updateDeviceToken,
-  );
   return router;
 }
