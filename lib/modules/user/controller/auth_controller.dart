@@ -79,31 +79,65 @@ class AuthController {
   @Route.post('/register')
   Future<Response> saveUser(Request request) async {
     try {
-      final userModel = UserSaveInputModel(
-        await request.readAsString(),
-      );
+      final requestData = await request.readAsString();
+      print('Received data: $requestData');
+      final userModel = UserSaveInputModel(requestData);
+
+      if (userModel.email.isEmpty ||
+          userModel.password.isEmpty ||
+          userModel.timezone == null ||
+          userModel.firstname.isEmpty ||
+          userModel.lastname.isEmpty ||
+          userModel.username.isEmpty) {
+        log.info('Recieved user data: ${await request.readAsString()}');
+        return Response(
+          400,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(
+            {
+              'message':
+                  'Missing required fields. Please ensure all required fields are provided.',
+            },
+          ),
+        );
+      }
 
       await userService.createUser(userModel);
 
       return Response.ok(
         jsonEncode(
           {
-            'message': 'Succefully registred!!',
+            'message': 'Successfully registered!',
           },
         ),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       );
-    } on UserExistsExecptions {
+    } on UserExistsExceptions {
       return Response(
         400,
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode(
           {
-            'message': 'User already exists on database!!',
+            'message': 'User already exists in the database!',
           },
         ),
       );
     } catch (e) {
       log.error('Error on register user', e);
-      return Response.internalServerError();
+      return Response.internalServerError(
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(
+          {
+            'message': 'Error on registering user',
+          },
+        ),
+      );
     }
   }
 
