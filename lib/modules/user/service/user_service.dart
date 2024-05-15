@@ -2,14 +2,11 @@ import 'package:injectable/injectable.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 
 import '../../../application/exceptions/service_exception.dart';
-import '../../../application/exceptions/user_not_found_exception.dart';
 import '../../../application/helpers/jwt_helper.dart';
 import '../../../application/logger/i_logger.dart';
 import '../../../entities/user.dart';
 import '../data/i_user_repository.dart';
-import '../view_models/user_update_token_device_input_model.dart';
 import '../view_models/refresh_token_view_model.dart';
-import '../view_models/update_url_avatar_view_model.dart';
 import '../view_models/user_confirm_input_model.dart';
 import '../view_models/user_refresh_token_input_model.dart';
 import '../view_models/user_save_input_model.dart';
@@ -44,34 +41,6 @@ class UserService implements IUserService {
         email,
         password,
       );
-
-  // @override
-  // Future<User> loginWithSocial(
-  //   String email,
-  //   String avatar,
-  //   String socialType,
-  //   String socialKey,
-  // ) async {
-  //   try {
-  //     return await userRepository.loginByEmailSocialKey(
-  //       email,
-  //       socialKey,
-  //       socialType,
-  //     );
-  //   } on UserNotFoundException catch (e) {
-  //     log.error('User not found, creating new user', e);
-
-  //     final user = User(
-  //       email: email,
-  //       imageAvatar: avatar,
-  //       registerType: socialType,
-  //       socialKey: socialKey,
-  //       password: DateTime.now().toString(),
-  //     );
-
-  //     return await userRepository.createUser(user);
-  //   }
-  // }
 
   @override
   Future<String> confirmLogin(UserConfirmInputModel inputModel) async {
@@ -125,6 +94,4 @@ class UserService implements IUserService {
 
   @override
   Future<User> findById(int id) => userRepository.findById(id);
-
-  
 }
