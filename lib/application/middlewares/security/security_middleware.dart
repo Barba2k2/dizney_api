@@ -13,7 +13,7 @@ class SecurityMiddleware extends Middlewares {
   final ILogger log;
   final skipUrl = <SecuritySkipUrl>[
     SecuritySkipUrl(url: '/auth/register', method: 'POST'),
-    SecuritySkipUrl(url: '/auth/', method: 'POST'),
+    SecuritySkipUrl(url: '/auth/login', method: 'POST'),
   ];
 
   SecurityMiddleware(this.log);
@@ -52,7 +52,6 @@ class SecurityMiddleware extends Middlewares {
       final claimsMap = claims.toJson();
 
       final userId = claimsMap['sub'];
-      final adminId = claimsMap['admin'];
 
       if (userId != null) {
         throw JwtException.invalidToken;
@@ -61,7 +60,6 @@ class SecurityMiddleware extends Middlewares {
       final securityHeaders = {
         'user': userId,
         'access_token': authorizationToken,
-        'admin': adminId,
       };
 
       return innerHandler(
