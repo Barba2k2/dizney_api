@@ -90,7 +90,7 @@ class UserRepository implements IUserRepository {
     try {
       conn = await connection.openConnection();
 
-      var query = 'SELECT * FROM usuario WHERE email = ? AND senha = ?';
+      var query = 'SELECT * FROM users WHERE email = ? AND password = ?';
 
       final result = await conn.query(
         query,
@@ -108,7 +108,14 @@ class UserRepository implements IUserRepository {
 
         return User(
           id: userSqlData['id'] as int,
+          firstname: userSqlData['firstname'],
+          lastname: userSqlData['lastname'],
+          username: userSqlData['username'],
           email: userSqlData['email'],
+          image: userSqlData['image'],
+          timezone: userSqlData['timezone'],
+          identityVerify: userSqlData['identity_verify'],
+          addressVerify: userSqlData['address_verify'],
         );
       }
     } on MySqlException catch (e, s) {
@@ -128,7 +135,7 @@ class UserRepository implements IUserRepository {
       conn = await connection.openConnection();
 
       await conn.query(
-        'UPDATE usuario SET refresh_token = ? WHERE id = ?',
+        'UPDATE users SET refresh_token = ? WHERE id = ?',
         [
           user.id!,
         ],
@@ -149,7 +156,7 @@ class UserRepository implements IUserRepository {
       conn = await connection.openConnection();
 
       final result = await conn.query(
-        'SELECT * FROM usuario WHERE id = ?',
+        'SELECT * FROM users WHERE id = ?',
         [
           id,
         ],
