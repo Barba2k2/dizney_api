@@ -53,7 +53,9 @@ class SecurityMiddleware extends Middlewares {
 
       final userId = claimsMap['sub'];
 
-      if (userId != null) {
+      log.info('UserID: $userId');
+
+      if (userId == null) {
         throw JwtException.invalidToken;
       }
 

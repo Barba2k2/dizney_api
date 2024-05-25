@@ -80,8 +80,10 @@ class AuthController {
   Future<Response> saveUser(Request request) async {
     try {
       final requestData = await request.readAsString();
-      print('Received data: $requestData');
+      // log.debug('Received data: $requestData');
       final userModel = UserSaveInputModel(requestData);
+
+      log.info(userModel.data);
 
       if (userModel.email.isEmpty ||
           userModel.password.isEmpty ||
@@ -89,7 +91,7 @@ class AuthController {
           userModel.firstname.isEmpty ||
           userModel.lastname.isEmpty ||
           userModel.username.isEmpty) {
-        log.info('Recieved user data: ${await request.readAsString()}');
+        log.debug('Recieved user data: $requestData');
         return Response(
           400,
           headers: {
@@ -98,7 +100,7 @@ class AuthController {
           body: jsonEncode(
             {
               'message':
-                  'Missing required fields. Please ensure all required fields are provided.',
+                  'Campos obrigatórios vazios. Verifique se todos os campos obrigatórios foram preenchidos',
             },
           ),
         );
@@ -109,7 +111,7 @@ class AuthController {
       return Response.ok(
         jsonEncode(
           {
-            'message': 'Successfully registered!',
+            'message': 'Registrado com sucesso!',
           },
         ),
         headers: {
@@ -122,19 +124,19 @@ class AuthController {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(
           {
-            'message': 'User already exists in the database!',
+            'message': 'Usuário já cadastrado na base de dados!',
           },
         ),
       );
-    } catch (e) {
-      log.error('Error on register user', e);
+    } catch (e, s) {
+      log.error('Error on register user', e, s);
       return Response.internalServerError(
         headers: {
           'Content-Type': 'application/json',
         },
         body: jsonEncode(
           {
-            'message': 'Error on registering user',
+            'message': 'Erro ao registrar usuário!',
           },
         ),
       );
